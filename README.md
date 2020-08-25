@@ -9,5 +9,5 @@ FATAL:   Unable to pull docker://jupyter/datascience-notebook:latest: conveyor f
 Answer:
 You may need to supply your Docker Hub login by exporting the following vars:
 
-export SINGULARITY_DOCKER_USERNAME=DOCKER_USER
-export SINGULARITY_DOCKER_PASSWORD=<redacted>
+export SINGULARITY_DOCKER_USERNAME=DOCKERHUB_USER
+export SINGULARITY_DOCKER_PASSWORD=DOCKERHUB_PW
