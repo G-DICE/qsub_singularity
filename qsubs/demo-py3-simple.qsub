@@ -1,0 +1,53 @@
+#!/bin/bash -l
+#
+#
+#$ -j y
+#$ -cwd
+#$ -N run_demo_py3
+#$ -l mem_requested=20G,tmp_requested=200G,tmpfree=200G
+#$ -V
+#
+
+##### IMPORTANT NOTE: this script works with pyspark-notebook image from Jupyter Docker Stacks
+##### https://jupyter-docker-stacks.readthedocs.io/en/latest/index.html
+
+# Please make sure you have a script named demo-py3-simple.py inside
+# the location of $SCRIPT_DIR
+
+cat /tmp/prolog_exec_"$JOB_ID"_"$SGE_TASK_ID".log
+
+echo "JOB: $JOB_ID TASK: $SGE_TASK_ID"
+echo "$HOSTNAME $tmp_requested $TMPDIR"
+
+IMAGE_URL="docker://jupyter/pyspark-notebook:latest"
+
+# A scratch dir for building image, it can be temp scratch on the compute node
+# or set it to a cluster share storage path (such as /share/ScratchGeneral if
+# want to keep the image file.
+IMAGE_TMP="$TMPDIR"
+
+# Unprivileged user jovyan is setup in this container. Here is to specify which
+# local location is used to mount /home/jovyan inside the container. You may want
+# to set to your HOME dir or where you store the scripts.
+SCRIPT_DIR="$HOME"
+
+# Provide a local path of your data, this location will be mounted to /data
+# and expose your data inside the container.
+DATA_DIR="/share/ScratchGeneral/$USER"
+
+# pull the image
+cd ${IMAGE_TMP}
+
+imagename=${IMAGE_URL##*/}
+imagename=${imagename/:/_}.sif
+singularity pull $imagename $IMAGE_URL
+
+# Launch our container
+# and mount our working directory to /home/jovyan in the container
+# and bind the run time directory to our home directory
+singularity exec -C \
+  -B ${SCRIPT_DIR}:/home/jovyan \
+  -B ${DATA_DIR}:/data \
+  ${imagename} \
+  python /home/jovyan/demo-py3-simple.py /data/demo-py3-simple.output
+
