@@ -1,0 +1,104 @@
+#!/bin/bash -l
+#
+# Script adapted from PAWSEY:
+# https://support.pawsey.org.au/documentation/display/US/Running+JupyterHub+on+Zeus+with+Singularity
+#
+#$ -j y
+#$ -cwd
+#$ -N run_jupyter_tensorflow
+#$ -l nvgpu=4,mem_requested=20G,tmp_requested=200G
+#$ -V
+#
+
+##### IMPORTANT NOTE: this script works with the R-notebook image from Jupyter Docker Stacks
+##### https://jupyter-docker-stacks.readthedocs.io/en/latest/index.html
+
+cat /tmp/prolog_exec_"$JOB_ID"_"$SGE_TASK_ID".log
+
+echo "JOB: $JOB_ID TASK: $SGE_TASK_ID"
+echo "$HOSTNAME $tmp_requested $TMPDIR"
+
+IMAGE_URL="docker://jupyter/tensorflow-notebook:latest"
+
+# A scratch dir for building image, it can be temp scratch on the compute node
+# or set it to a cluster share storage path (such as /share/ScratchGeneral if 
+# want to keep the image file.
+IMAGE_TMP="$TMPDIR"
+
+# Unprivileged user jovyan is setup in this container. Here is to specify which
+# local location is used to mount /home/jovyan inside the container for storing
+# notebooks. Each RUNNING jupyter SGE session should have its own dedicated dir.
+# Notebooks are saved on the local location and can be reused in the future session.
+JUPYTER_DIR="$HOME/jupyter_dir/$JOB_ID"
+mkdir -p $JUPYTER_DIR
+
+# Provide a local path of your data, this location will be mounted to /data
+# and expose your data inside the container.
+DATA_DIR="/share/ScratchGeneral/$USER"
+
+# A local path that will be mounted to /scratch inside the container. Here
+# it is set to use the SGE TMPDIR location  which is dedicated for each job.
+SCRATCH_DIR="$TMPDIR"
+
+# Get the hostname of the compute node on where jupyter is running
+# We'll set up an SSH tunnel to connect to the Juypter notebook server
+exec_host=$(hostname)
+ 
+# Set the port for the SSH tunnel
+# This part of the script uses a loop to search for available ports on the node;
+# this will allow multiple instances of GUI servers to be run from the same host node
+port="8888"
+pfound="0"
+while [ $port -lt 65535 ] ; do
+  check=$( netstat -tuna | awk '{print $4}' | grep ":$port *" )
+  if [ "$check" == "" ] ; then
+    pfound="1"
+    break
+  fi
+  : $((++port))
+done
+if [ $pfound -eq 0 ] ; then
+  echo "No available communication port found to establish the SSH tunnel."
+  echo "Try again later. Exiting."
+  exit
+fi
+ 
+cd ${IMAGE_TMP}
+
+# Pull the image in a folder
+imagename=${IMAGE_URL##*/}
+imagename=${imagename/:/_}.sif
+singularity pull $imagename $IMAGE_URL
+ 
+echo "*****************************************************"
+echo "SSH Tunnel Setup - macOS or Linux computer do:"
+echo "ssh -N -f -L ${port}:${exec_host}:${port} $USER@$SGE_O_HOST.garvan.unsw.edu.au"
+echo "*****"
+echo "Image name: $imagename"
+echo "Image build directory: ${IMAGE_TMP}"
+echo "Jupyter directory: ${JUPYTER_DIR}"
+echo "Data directory: ${DATA_DIR}"
+echo "*****************************************************"
+echo ""
+echo "*****************************************************"
+echo "Terminate - do:"
+echo "kill \$( ps x | grep 'ssh.*-L *${port}:${exec_host}:${port}' | awk '{print \$1}' )"
+echo "*****************************************************"
+echo ""
+
+module load cuda/11.0.1
+export SINGULARITYENV_CUDA_HOME=$CUDA_HOME
+
+# Launch our container
+# and mount our working directory to /home/jovyan in the container
+# and bind the run time directory to our home directory
+singularity exec --nv -C \
+  -B ${JUPYTER_DIR}:/home/jovyan \
+  -B ${DATA_DIR}:/data \
+  -B ${SCRATCH_DIR}:/scratch \
+  ${imagename} \
+  jupyter notebook \
+  --no-browser \
+  --port=${port} --ip=0.0.0.0 \
+  --notebook-dir=/home/jovyan
+
