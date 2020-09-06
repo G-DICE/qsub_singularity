@@ -3,6 +3,9 @@
 # Script adapted from PAWSEY:
 # https://support.pawsey.org.au/documentation/display/US/Running+JupyterHub+on+Zeus+with+Singularity
 #
+
+# PLEASE MAKE SURE YOU CHANGE THE FOLLOWING QSUB SETTINGS TO SUIT YOUR NEEDS 
+#
 #$ -j y
 #$ -cwd
 #$ -N run_jupyter_tensorflow
@@ -10,14 +13,18 @@
 #$ -V
 #
 
-##### IMPORTANT NOTE: this script works with the R-notebook image from Jupyter Docker Stacks
+##### IMPORTANT NOTE: this script bases on the images from Jupyter Docker Stacks
 ##### https://jupyter-docker-stacks.readthedocs.io/en/latest/index.html
 
-cat /tmp/prolog_exec_"$JOB_ID"_"$SGE_TASK_ID".log
+##### This script may use module to load additional libraries, please configure
+##### module accordingly in your env before proceeding.
 
+# Capture some essential SGE info
+cat /tmp/prolog_exec_"$JOB_ID"_"$SGE_TASK_ID".log
 echo "JOB: $JOB_ID TASK: $SGE_TASK_ID"
 echo "$HOSTNAME $tmp_requested $TMPDIR"
 
+#
 IMAGE_URL="docker://jupyter/tensorflow-notebook:latest"
 
 # A scratch dir for building image, it can be temp scratch on the compute node
@@ -90,8 +97,6 @@ module load cuda/11.0.1
 export SINGULARITYENV_CUDA_HOME=$CUDA_HOME
 
 # Launch our container
-# and mount our working directory to /home/jovyan in the container
-# and bind the run time directory to our home directory
 singularity exec --nv -C \
   -B ${JUPYTER_DIR}:/home/jovyan \
   -B ${DATA_DIR}:/data \
