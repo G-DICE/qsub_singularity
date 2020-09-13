@@ -101,6 +101,7 @@ singularity exec --nv -C \
   -B ${JUPYTER_DIR}:/home/jovyan \
   -B ${DATA_DIR}:/data \
   -B ${SCRATCH_DIR}:/scratch \
+  -B ${CUDA_HOME}:${CUDA_HOME} \
   ${imagename} \
   jupyter notebook \
   --no-browser \
