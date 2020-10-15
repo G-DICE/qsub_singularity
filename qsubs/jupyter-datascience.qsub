@@ -10,13 +10,20 @@
 #$ -V
 #
 
+# PLEASE REVIEW AND ADJUST THE QSUB FLAGS ABOVE FIRST
+
 ##### IMPORTANT NOTE: this script works with the datascience-notebook image from Jupyter Docker Stacks
 ##### https://jupyter-docker-stacks.readthedocs.io/en/latest/index.html
 
+# SGE DEBUG METADATA
 cat /tmp/prolog_exec_"$JOB_ID"_"$SGE_TASK_ID".log
 
 echo "JOB: $JOB_ID TASK: $SGE_TASK_ID"
 echo "$HOSTNAME $tmp_requested $TMPDIR"
+
+#######################################
+# General user to customise
+#######################################
 
 IMAGE_URL="docker://jupyter/datascience-notebook:latest"
 
@@ -35,6 +42,10 @@ mkdir -p $JUPYTER_DIR
 # Provide a local path of your data, this location will be mounted to /data
 # and expose your data inside the container.
 DATA_DIR="/share/ScratchGeneral/$USER"
+
+################################
+# DO NOT MODIFY (Adv User ONLY)
+################################
 
 # Get the hostname of the compute node on where jupyter is running
 # We'll set up an SSH tunnel to connect to the Juypter notebook server
@@ -67,18 +78,17 @@ imagename=${imagename/:/_}.sif
 singularity pull $imagename $IMAGE_URL
  
 echo "*****************************************************"
-echo "SSH Tunnel Setup - macOS or Linux computer do:"
-echo "ssh -N -f -L ${port}:${exec_host}:${port} $USER@$SGE_O_HOST.garvan.unsw.edu.au"
-echo "*****"
-echo "Image name: $imagename"
-echo "Image build directory: ${IMAGE_TMP}"
-echo "Jupyter directory: ${JUPYTER_DIR}"
-echo "Data directory: ${DATA_DIR}"
+echo "Setup SSH Tunnel - ON YOUR OWN COMPUTER macOS or Linux:"
+echo ""
+echo "ssh -N -f -L PICK_A_LOCAL_PORT:${exec_host}:${port} $USER@$SGE_O_HOST.garvan.unsw.edu.au"
+echo ""
 echo "*****************************************************"
 echo ""
 echo "*****************************************************"
-echo "Terminate - do:"
-echo "kill \$( ps x | grep 'ssh.*-L *${port}:${exec_host}:${port}' | awk '{print \$1}' )"
+echo "Terminate SSH Tunnel - ON YOUR OWN COMPUTER do:"
+echo ""
+echo "kill \$( ps x | grep 'ssh.*-L *PICK_A_LOCAL_PORT:${exec_host}:${port}' | awk '{print \$1}' )"
+echo ""
 echo "*****************************************************"
 echo ""
  
