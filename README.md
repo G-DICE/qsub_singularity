@@ -1,4 +1,5 @@
 ***DISCLAIMER***
+
 This repository is provided to the HPC community for educational and inspirational 
 purposes only. The scripts inside might have worked in the past but not now. To
 understand, modify and use the scripts require proficiency or require a steep 
@@ -11,7 +12,7 @@ learning curve in the following:
 5) Singularity, docker etc
 
 
-FQA:
+***FQA***
 
 Q1: The job fails with the following error:
 
@@ -23,4 +24,5 @@ Answer:
 You may have the following setup in your .bashrc from the previous use of docket:
 
 export SINGULARITY_DOCKER_USERNAME=DOCKERHUB_USER
+
 export SINGULARITY_DOCKER_PASSWORD=DOCKERHUB_PW
