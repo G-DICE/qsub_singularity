@@ -1,0 +1,136 @@
+Bootstrap: docker
+From: centos:6.10
+
+%post
+	yum -y groupinstall "Development tools"
+	yum -y install \
+		atlas-devel.x86_64 \
+		atlas.x86_64 \
+		blas-devel.x86_64 \
+		blas.x86_64 \
+		boost-devel.x86_64 \
+		boost.x86_64 \
+		cifs-utils \
+		cmake \
+		compat-dapl-devel \
+		compat-gcc-34 \
+		compat-gcc-34-c++ \
+		compat-gcc-34-g77 \
+		compat-glibc \
+		compat-glibc-headers \
+		compat-libcap1.x86_64 \
+		compat-libgfortran-41.x86_64 \
+		compat-libstdc++-296 \
+		compat-libstdc++-33.x86_64 \
+		compat-libtermcap.x86_64 \
+		dbus-x11 \
+		dejagnu \
+		ecj \
+		expat-devel.x86_64 \
+		freeglut-devel.x86_64 \
+		freeglut.x86_64 \
+		gcc-c++ \
+		git \
+		glibc-devel.i686 \
+		glibc-static.x86_64 \
+		gmp-devel.x86_64 \
+		gnome-vfs2-devel.x86_64 \
+		gnuplot.x86_64 \
+		graphviz-devel.x86_64 \
+		graphviz.x86_64 \
+		gsl-devel.x86_64 \
+		gsl.x86_64 \
+		gvfs-fuse \
+		gvfs-smb \
+		icu.x86_64 \
+		ImageMagick-devel.x86_64 \
+		ImageMagick.x86_64 \
+		java-1.8.0-openjdk-devel \
+		java-1.8.0-openjdk \
+		lapack-devel.x86_64 \
+		lapack.x86_64 \
+		libcurl-devel.x86_64 \
+		liberation-mono-fonts \
+		liberation-sans-fonts \
+		liberation-serif-fonts \
+		libgnomecanvas-devel.x86_64 \
+		libgnomeui-devel.x86_64 \
+		libicu-devel.x86_64 \
+		libicu.x86_64 \
+		libstdc++.i686 \
+		libtool \
+		libxslt-devel.x86_64 \
+		libxslt.x86_64 \
+		links \
+		mercurial \
+		mpfr-devel.x86_64 \
+		mysql-devel \
+		numpy \
+		openmpi-devel \
+		perl-CPAN \
+		perl-Pod-Coverage \
+		perl-Pod-Escapes \
+		perl-Pod-POM \
+		perl-Pod-Simple \
+		perl-Pod-Spell \
+		perl-XML-LibXML \
+		perl-XML-NamespaceSupport \
+		perl-XML-SAX \
+		perl-XML-Simple \
+		readline-devel.x86_64 \
+		samba-client \
+		screen.x86_64 \
+		sqlite-devel.x86_64 \
+		subversion.x86_64 \
+		tcl-devel.x86_64 \
+		texlive \
+		texlive-dvips \
+		texlive-latex \
+		tk-devel.x86_64 \
+		tokyocabinet-devel.x86_64 \
+		tokyocabinet.x86_64 \
+		vim-enhanced \
+		xerces-c-devel.x86_64 \
+		xerces-c.x86_64 \
+		xqilla-devel.x86_64 \
+		xqilla.x86_64  \
+		xz-devel.x86_64 \
+		yum-utils \
+		zlib-static.x86_64 \
+		vim-enhanced \
+		vim-filesystem \
+		vim-X11
+
+	yum -y install epel-release centos-release-scl
+
+	yum -y install --enablerepo=epel \
+		ack \
+		cmake3 \
+		globus-openssl-module \
+		globus-openssl-module-devel \
+		golang \
+		hdf5 \
+		htop \
+		libgtextutils \
+		libgtextutils-devel \
+		libmpc \
+		libmpc-devel \
+		librsync \
+		librsync-devel \
+		libunwind \
+		lxc \
+		ncftp \
+		nload \
+		reptyr \
+		sparsehash-devel \
+		v8-devel
+
+	yum -y install --enablerepo=centos-sclo-rh \
+		devtoolset-7
+
+	yum-config-manager --disable epel
+	yum-config-manager --disable centos-sclo-sclo
+	yum-config-manager --disable centos-sclo-rh
+
+	yum repolist enabled
+	yum repolist disabled
